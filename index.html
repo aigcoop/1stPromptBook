@@ -157,7 +157,7 @@
               id: 20, 
               category: "2.지쿱AI대학교 1학년 2주차", 
               title: "레드-블루 이중 노출 효과 (2-13)", 
-              content: "동일한 캐릭터의 두 가지 포즈를 활용하여 예술적인 레드-블루 이중 노출(Double-exposure) 효과를 적용하세요:\n\n기본 레이어: 오리지널 포즈를 유지합니다.\n\n보조 레이어: 머리 각도, 시선 처리 또는 표정이 마치 찰나의 전후 순간을 포착한 것처럼 미세하게 다른 두 번째 포즈를 생성합니다.\n\n색상 및 효과: 두 번째 포즈는 **레드(Red)**로, 기본 포즈는 **시안(Cyan, 청록)**으로 색을 입힙니다. 두 레이어를 살짝 어긋나게 배치하여 깔끔한 잔상 효과(Ghosting effect)를 만듭니다.", 
+              content: "동일한 캐릭터의 두 가지 포즈를 활용하여 예술적인 레드-블루 이중 노출(Double-exposure) 효과를 적용하세요:\n\n기본 레이어: 오리지널 포즈를 유지합니다.\n\n보조 레이어: 머리 각도, 시선 처리 또는 표정이 마치 찰나의 전후 순간을 포착한 것처럼 미세하게 다른 두 번째 포즈를 생성합니다.\n\n색상 및 효과: 두 번째 포즈는 **레드(Red)**로, 기본 포즈는 **시안(Cyan, 청록)**으로 색을 입립닙니다. 두 레이어를 살짝 어긋나게 배치하여 깔끔한 잔상 효과(Ghosting effect)를 만듭니다.", 
               imageUrl: "images/20.png" 
             },
             { 
@@ -474,6 +474,7 @@
 
             const handleShare = async (e, prompt) => {
                 if (e) e.stopPropagation();
+                // 요청 사항 반영: 오직 프롬프트 내용만 공유 (주소 제외)
                 const shareData = { text: prompt.content };
                 if (navigator.share) {
                     try { await navigator.share(shareData); } catch (err) {}
@@ -604,7 +605,7 @@
                                                 <Icon name="share-2" size={12} /> 공유
                                             </button>
                                         </div>
-                                        <h2 className="text-lg font-black text-slate-900 mb-3 leading-tight truncate">{selectedPrompt.title}</h2>
+                                        <h2 className="text-lg font-black text-slate-900 mb-3 leading-tight line-clamp-2">{selectedPrompt.title}</h2>
                                         
                                         <div className="bg-slate-100/50 p-4 rounded-xl border border-slate-100 shadow-inner flex-1 overflow-y-auto custom-scrollbar mb-4">
                                             <p className="text-slate-800 text-[13px] font-medium leading-relaxed whitespace-pre-wrap">
@@ -616,6 +617,11 @@
                                             {selectedPrompt.content.includes("http") && (
                                                 <button onClick={(e) => handleVisitLink(e, selectedPrompt.content)} className="py-3.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-md flex items-center justify-center gap-2 active:scale-95">
                                                     <Icon name="external-link" size={16} /> 링크 방문하기
+                                                </button>
+                                            )}
+                                            {selectedPrompt.imageUrl && (
+                                                <button onClick={(e) => handleDownload(e, selectedPrompt.imageUrl, selectedPrompt.title)} className="py-2.5 rounded-xl bg-white border border-indigo-200 text-indigo-600 font-bold text-xs flex items-center justify-center gap-2 active:bg-indigo-50">
+                                                    <Icon name="download" size={14} /> 이미지 저장
                                                 </button>
                                             )}
                                             <button onClick={() => handleCopy(selectedPrompt.content, selectedPrompt.id)} className={`py-2.5 rounded-xl font-bold text-xs shadow-sm transition-all active:scale-95 ${copiedId === selectedPrompt.id ? 'bg-green-500 text-white' : 'bg-white text-indigo-600 border border-indigo-200'}`}>
