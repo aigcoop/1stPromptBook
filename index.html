@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지쿱 AI 대학교 1학년 프롬프트북 - G-Coop AI Univ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+
+        const CATEGORIES = [
+            "전체보기",
+            "1.지쿱AI대학교 1학년 1주차",
+            "2.지쿱AI대학교 1학년 2주차",
+            "3.지쿱AI대학교 1학년 3주차",
+            "4.지쿱AI대학교 1학년 4주차",
+            "5.지쿱AI대학교 일일과제",
+            "6.GEMS용프롬프트"
+        ];
+
+        const INITIAL_PROMPTS = [
+            // --- 1주차 ---
+            { id: 1, category: "1.지쿱AI대학교 1학년 1주차", title: "힙합 골든 리트리버 (1-1)", content: "귀여운 골든 리트리버 강아지, 힙합 스타일의 빨간색 털모자와 선글라스, 카메라를 정면으로 응시, 매우 사실적인 4K 사진 스타일", imageUrl: "images/1.jpg" },
+            { id: 2, category: "1.지쿱AI대학교 1학년 1주차", title: "전문가 프로필 사진 (1-2)", content: "깔끔한 정장 차림의 CEO/전문가, 배경은 모던한 공유 오피스, 신뢰감을 주는 미소와 조명, 링크드인 프로필 사진 스타일", imageUrl: "images/2.jpg" },
+            { id: 3, category: "1.지쿱AI대학교 1학년 1주차", title: "배경 변경: 에펠탑 카페 (1-3)", content: "인물은 그대로 유지하고 배경만 바꿔줘. 프랑스 파리의 에펠탑이 보이는 노천 카페, 따뜻한 햇살과 여유로운 분위기, 여행 인플루언서 사진 스타일", imageUrl: "images/3.jpeg" },
+            { id: 4, category: "1.지쿱AI대학교 1학년 1주차", title: "의상 변경: 가을 화보 (1-4)", content: "얼굴은 유지하고 옷만 바꿔줘, 최신 트렌드의 오버핏 코트와 머플러, 가을 거리의 패션 화보 느낌, 세련되고 도시적인 분위기", imageUrl: "images/4.jpeg" },
+            { id: 5, category: "1.지쿱AI대학교 1학년 1주차", title: "치즈 소(영상프롬프트) (1-5)", content: "환상적인 알프스 풍경 위로 2D 스톱모션 애니메이션이 부드럽게 흘러갑니다. 모든 요소는 마치 손으로 만든 듯한 평면 치즈로 만들어졌습니다.", imageUrl: "images/5.jpeg" },
+            { id: 6, category: "1.지쿱AI대학교 1학년 1주차", title: "헬스장 근육남(영상프롬프트) (1-6)", content: "헬스장 탈의실에서 근육질의 한국인 피트니스 인플루언서가 거울에 비친 자신의 모습을 노려보고 있다. 그는 자신에게 화를 내며 소리치다가 조용히 흐느끼며 프라이드 치킨이 먹고 싶다고 고백한다.", imageUrl: "images/6.jpeg" },
+            
+            // --- 2주차 ---
+            { id: 7, category: "2.지쿱AI대학교 1학년 2주차", title: "수염난 전문가 프로필 (2-1)", content: "첨부한 얼굴 이미지를 주요 얼굴 참조로 활용하여 동일한 인물임을 유지하되, 눈 선명도, 피부결 개선, 대칭적인 얼굴 윤곽 보정, 입체감 있는 수염 디테일을 강화해 더욱 세련되고 멋진 비율로 업그레이드합니다. LinkedIn / 기업 프로필에 최적화된 톤", imageUrl: "images/7.jpeg" },
+            { id: 8, category: "2.지쿱AI대학교 1학년 2주차", title: "초실사 인물사진 3x3 (2-2)", content: "업로드된 사진과 100% 동일한 얼굴 정체성을 사용하여 같은 인물의 초실사 8K 인물 사진 9장을 생성하세요. 이를 3x3 그리드로 배열하고, 각 장면은 고유한 포즈를 갖추어야 합니다.", imageUrl: "images/8.jpeg" },
+            { id: 9, category: "2.지쿱AI대학교 1학년 2주차", title: "지쿱간판 빨간후드티 (2-3)", content: "업로드된 이미지 속 인물의 하이퍼 리얼리스틱 전신 인물 사진입니다. 인물은 '앉아 있는' 자세를 취하고 대형 GCOOP 간판에 기대어 있습니다. 빨간색 후드티를 입고 있습니다.", imageUrl: "images/9.png" },
+            { id: 10, category: "2.지쿱AI대학교 1학년 2주차", title: "피카츄 꼬부기 하이엔드 화보 (2-4)", content: "원래 얼굴을 완벽하게 보존하며 거대한 3D 포토리얼리스틱 꼬부기와 장난스럽게 상호작용하는 잡지 화보 스타일 이미지.", imageUrl: "images/10.png" },
+            { id: 11, category: "2.지쿱AI대학교 1학년 2주차", title: "지쿱 입학 회색티셔츠 (2-5)", content: "50mm 렌즈로 촬영한 로우 앵글 샷. 베이지색 맨투맨에 '지쿱 AI 대학교 입학하세요'라고 크게 씌어 있습니다.", imageUrl: "images/11.png" },
+            { id: 12, category: "2.지쿱AI대학교 1학년 2주차", title: "캐논 디지털카메라 (2-6)", content: "컴팩트한 캐논 디지털 카메라 화면에 표시된 인물 클로즈업 샷. 카메라 바디의 질감이 보입니다.", imageUrl: "images/12.png" },
+            { id: 13, category: "2.지쿱AI대학교 1학년 2주차", title: "미니어처 주변 캐릭터 (2-7)", content: "극사실적인 메인 주인공 주변에 동일한 특징을 가진 귀여운 3D 치비 미니어처들이 둘러싸고 있는 장면.", imageUrl: "images/13.png" },
+            { id: 14, category: "2.지쿱AI대학교 1학년 2주차", title: "몽환적 캐릭터 남자 (2-8-1)", content: "어둡고 몽환적이며 빈티지한 느낌의 밤, 차 창밖으로 등을 기대고 있는 남성의 사진.", imageUrl: "images/14.png" },
+            { id: 15, category: "2.지쿱AI대학교 1학년 2주차", title: "몽환적 캐릭터 여자 (2-8-2)", content: "어둡고 몽환적인 밤, 오프숄더 흰색 니트 상의를 입고 갈색 긴 웨이브 머리를 한 여성의 사진.", imageUrl: "images/15.png" },
+            { id: 16, category: "2.지쿱AI대학교 1학년 2주차", title: "하이엔드 스포츠 헌정 포스터 (2-9)", content: "복합적인 '이중 노출 포토 그리드 합성' 스타일의 스포츠 컨셉 포스터 디자인.", imageUrl: "images/16.png" },
+            { id: 17, category: "2.지쿱AI대학교 1학년 2주차", title: "하이패션스튜디오 포트레이트 (2-10)", content: "화이트 빈티지 셰이즈 롱 위에 우아하게 앉아 있는 딥 블루 비즈니스 정장의 포트레이트.", imageUrl: "images/17.png" },
+            { id: 18, category: "2.지쿱AI대학교 1학년 2주차", title: "포스터 스타일의 콜라주 디자인 (2-11)", content: "순백색 배경 위에 놓인 세로형 포스터 스타일의 흑백 패널과 컬러 모델 대비 콜라주.", imageUrl: "images/18.png" },
+            { id: 19, category: "2.지쿱AI대학교 1학년 2주차", title: "LOMO LC-A 스타일 (2-12)", content: "LOMO LC-A 스타일의 고화질 사진. 수많은 흑백 패션 광고판 위에 서 있는 모델.", imageUrl: "images/19.png" },
+            { id: 20, category: "2.지쿱AI대학교 1학년 2주차", title: "레드-블루 이중 노출 효과 (2-13)", content: "동일 캐릭터의 두 가지 포즈를 활용한 레드-블루 잔상 이중 노출 효과.", imageUrl: "images/20.png" },
+            { id: 21, category: "2.지쿱AI대학교 1학년 2주차", title: "영화 스타일 미니멀 포스터 (2-14)", content: "얼굴 조각들이 층층이 쌓인 듯한 입체적인 종이 질감의 미니멀 영화 포스터 스타일.", imageUrl: "images/21.png" },
+            { id: 22, category: "2.지쿱AI대학교 1학년 2주차", title: "두명이 마주보는 클로즈업 (2-15)", content: "두 인물의 얼굴이 화면 양쪽 프레임 끝에서 정면을 응시하는 드라마틱한 클로즈업 초상화.", imageUrl: "images/22.png" },
+            { id: 23, category: "2.지쿱AI대학교 1학년 2주차", title: "2-15-캡틴 (15-2)", content: "캡틴 초상화 예시 이미지입니다. 합성을 위한 소스로 활용하세요.", imageUrl: "images/22캡틴.jpg" },
+            { id: 24, category: "2.지쿱AI대학교 1학년 2주차", title: "GCOOP 고대 유적 로고 (2-16)", content: "고대 유적지 내부 암석을 깎아 만든 거대한 GCOOP 로고 하이퍼 리얼리스틱 3D 장면.", imageUrl: "images/23.png" },
+
+            // --- 3주차 ---
+            { id: 25, category: "3.지쿱AI대학교 1학년 3주차", title: "흑백 포토부스 스타일 (3-1)", content: "20개의 패널에 서로 다른 표정을 담은 4x5 흑백 포토부스 컨택트 시트 미학.", imageUrl: "images/3-1.png" },
+            { id: 26, category: "3.지쿱AI대학교 1학년 3주차", title: "아늑한 예술가 판타지 (3-2)", content: "예술가 스튜디오에서 캔버스 속 청록색 드래곤이 3차원으로 튀어나오는 마법적 사실주의 장면.", imageUrl: "images/3-2.png" },
+            { id: 27, category: "3.지쿱AI대학교 1학년 3주차", title: "고급 패션 잡지 화보 (3-3)", content: "뉴욕 타임스 스퀘어의 흐릿한 인물들 사이에서 차분하게 카메라를 응시하는 패션 화보.", imageUrl: "images/3-3.png" },
+            { id: 28, category: "3.지쿱AI대학교 1학년 3주차", title: "음료수 병 전문 사진 (3-4)", content: "광각 렌즈로 촬영한, 음료수 병을 카메라 렌즈에 밀착시킨 생동감 있는 액션 샷.", imageUrl: "images/3-4.png" },
+            { id: 29, category: "3.지쿱AI대학교 1학년 3주차", title: "완전한 인생 여정 콜라주 (3-5)", content: "초음파 이미지부터 노년의 모습까지 한 프레임에 담은 영화급 서사 콜라주.", imageUrl: "images/3-5.png" },
+            { id: 30, category: "3.지쿱AI대학교 1학년 3주차", title: "담배피는 불꽃 이미지 (3-6)", content: "타오르는 신문 불꽃 너머로 카메라를 응시하는 냉담한 여성의 힘을 보여주는 클로즈업.", imageUrl: "images/3-6.png" },
+            { id: 31, category: "3.지쿱AI대학교 1학년 3주차", title: "스타일화 편집 사진 (3-7)", content: "거대한 입 구조 내부에 앉아 있는 초현실적인 스타일화 편집 사진. GCOOP 로고 포함.", imageUrl: "images/3-7.png" },
+            { id: 32, category: "3.지쿱AI대학교 1학년 3주차", title: "하이 앵글 헤일로 (3-8)", content: "하이 앵글 스포트라이트 조명 아래 인물들의 얼굴이 빛나는 깔끔한 스튜디오 사진.", imageUrl: "images/3-8.jpg" },
+            { id: 33, category: "3.지쿱AI대학교 1학년 3주차", title: "야생 동물과 함께 하는 초상화 (3-9)", content: "일몰의 사바나를 배경으로 아기 사자와 함께 있는 8K 시네마틱 초상화.", imageUrl: "images/3-9.png" },
+            { id: 34, category: "3.지쿱AI대학교 1학년 3주차", title: "보그잡지 모델 (3-10)", content: "파파라치에 둘러싸인 채 윙크와 하트 포즈를 취하는 보그 잡지 커버 실사 패션 포트레이트.", imageUrl: "images/3-10.png" },
+
+            // --- 4주차 ---
+            { id: 35, category: "4.지쿱AI대학교 1학년 4주차", title: "수박 슬러시 유리병 (4-1)", content: "유리병 바닥에서 위를 바라보는 기발한 어안 렌즈 구도의 수박 슬러시 액션 샷.", imageUrl: "images/4-1.jpg" },
+            { id: 36, category: "4.지쿱AI대학교 1학년 4주차", title: "발렌타인데이 서프라이즈 (4-2)", content: "Valentine's Day Surprise 선물 상자 안에 앉아 있는 행복하고 놀란 표정의 초현실적 장면.", imageUrl: "images/4-2.jpg" },
+            { id: 37, category: "4.지쿱AI대학교 1학년 4주차", title: "디지털 페인팅 초상화 (4-3)", content: "강한 결단력과 야망이 느껴지는 에너제틱한 붓터치의 드라마틱한 디지털 페인팅.", imageUrl: "images/4-3.jpg" },
+            { id: 38, category: "4.지쿱AI대학교 1학년 4주차", title: "탕후루 기뻐하는 사람 (4-4)", content: "황금 시간대 강한 백라이트 아래 탕후루를 들고 환하게 웃는 인물의 고품질 사진.", imageUrl: "images/4-4.jpg" },
+            { id: 39, category: "4.지쿱AI대학교 1학년 4주차", title: "중국전통의상 인물 (4-5)", content: "전통 서예 붓을 수염처럼 코 아래 대고 장난스러운 표정을 짓는 중국 전통 의상 초상화.", imageUrl: "images/4-5.jpg" },
+
+            // --- 일일과제 ---
+            { id: 501, category: "5.지쿱AI대학교 일일과제", title: "1학년 1회차 과제 : AI 포스터 제작 안내", content: "[📢 지쿱 AI 1학년 1회차 과제]\n1. 이미지 프롬프트를 활용해 입학 포스터 제작\n2. 자쿠지 쥐떼 동영상 제작 미션\n3. 인스타그램 계정 생성 및 업로드", imageUrl: "images/5-1.png" },
+            { id: 502, category: "5.지쿱AI대학교 일일과제", title: "1학년 2회차 과제 : 말하는 AI 영상 제작", content: "[📢 지쿱 AI 1학년 2회차 과제]\n🎬 포스터 인물이 말하는 영상 만들기\n대사: 'AI로 부자되는 길, 직쿠웁 AI 대학교에 입팍카세요~'", imageUrl: null },
+            { id: 503, category: "5.지쿱AI대학교 일일과제", title: "1학년 3회차 과제 : 스마트폰 입체 이미지", content: "스마트폰에서 '지쿱 AI 대학교' 글씨가 입체로 튀어나오는 이미지 및 소리 포함 영상 제작 미션.", imageUrl: null },
+            { id: 504, category: "5.지쿱AI대학교 일일과제", title: "1학년 4회차 과제 : 디엘릭서 브라운 광고", content: "디엘릭서 브라운 제품을 들고 있는 사진 및 대사 포함 홍보 영상 제작 미션.", imageUrl: "images/5-4.jpg" },
+            { id: 505, category: "5.지쿱AI대학교 일일과제", title: "1학년 5회차 과제 : 텔로메라 세럼 화보", content: "텔로메라 세럼을 소중하게 감싸 쥔 아침 햇살 컨셉의 고화질 화보 및 줌인 광고 영상 제작.", imageUrl: "images/5-5.jpg" },
+            { id: 508, category: "5.지쿱AI대학교 일일과제", title: "[SNS업로드금지] 1학년 8회차 : 피카츄 포스터", content: "피카츄와 장난스럽게 상호작용하는 옐로우 니트 차림의 인물 포스터 및 영상 제작.", imageUrl: null },
+            { id: 509, category: "5.지쿱AI대학교 일일과제", title: "[SNS업로드금지] 1학년 9회차 : 3D 제품 광고", content: "꼬부기 프롬프트를 활용한 CK 광고 스타일의 3D 거대 제품 합성 포스터 미션.", imageUrl: null },
+            { id: 511, category: "5.지쿱AI대학교 일일과제", title: "1학년 11회차 : 하이앵글 LOMO 화보", content: "바닥에 깔린 수많은 광고판 위에 서 있는 하이 앵글 시점의 신비로운 제품 광고 포스터 제작.", imageUrl: null },
+            { id: 112, category: "5.지쿱AI대학교 일일과제", title: "1학년 12회차 : 쇼트트랙 금메달 기념", content: "쇼트트랙 수트를 입은 국가대표 컨셉의 초실사 스포츠 사진 및 축하 영상 제작 미션.", imageUrl: null },
+            { id: 513, category: "5.지쿱AI대학교 일일과제", title: "1학년 13회차 : 교육 프롬프트 10종 복습", content: "4회차 교육에서 배운 핵심 프롬프트 10종 복습 및 인스타그램 마케팅용 GEM 설정 미션.", imageUrl: null },
+
+            // --- GEMS용 ---
+            { id: 601, category: "6.GEMS용프롬프트", title: "지쿱 관상 도사 GEMS 링크", content: "지쿱 관상 도사 \nhttps://gemini.google.com/gem/1Do7YMsBQETAlyO58qpCeeibnoTaZFF3y?usp=sharing", imageUrl: null },
+            { id: 602, category: "6.GEMS용프롬프트", title: "지쿱 대박 도사 설정용 프롬프트", content: "너는 긍정적인 해석을 해주는 사주 전문가야. 생년월일을 입력받으면 초년, 중년, 말년 운을 풀이해 줘. 마지막엔 반드시 ‘귀인은 당신 곁에 있습니다’라고 해.", imageUrl: null },
+            { id: 603, category: "6.GEMS용프롬프트", title: "지쿱 인스타그램 감성 마케터", content: "내가 입력한 텍스트를 인스타그램 피드용으로 바꿔줘. 이모지를 풍부하게 사용하고 가독성을 위해 줄 바꿈을 자주 해줘.", imageUrl: null }
+        ];
+
+        // --- 아이콘 컴포넌트 ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            useEffect(() => { if(window.lucide) lucide.createIcons(); }, [name]);
+            return <i data-lucide={name} className={className} style={{ width: size, height: size }}></i>;
+        };
+
+        const App = () => {
+            const [prompts] = useState(INITIAL_PROMPTS);
+            const [selectedCategory, setSelectedCategory] = useState("전체보기");
+            const [searchQuery, setSearchQuery] = useState("");
+            const [copiedId, setCopiedId] = useState(null);
+            const [selectedPrompt, setSelectedPrompt] = useState(null);
+            const [showToast, setShowToast] = useState(null);
+
+            const filteredPrompts = useMemo(() => {
+                return prompts.filter(p => {
+                    const formattedP = p.category.replace(/\s/g, '');
+                    const formattedS = selectedCategory.replace(/\s/g, '');
+                    const matchesCategory = selectedCategory === "전체보기" || formattedP === formattedS;
+                    const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                          p.content.toLowerCase().includes(searchQuery.toLowerCase());
+                    return matchesCategory && matchesSearch;
+                });
+            }, [selectedCategory, searchQuery, prompts]);
+
+            const handleCopy = (text, id) => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    setCopiedId(id);
+                    setTimeout(() => setCopiedId(null), 2000);
+                } catch (err) {}
+                document.body.removeChild(textArea);
+            };
+
+            const handleDownload = (e, url, title) => {
+                if (e) e.stopPropagation();
+                if (!url) return;
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${title}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            const handleShare = async (e, prompt) => {
+                if (e) e.stopPropagation();
+                const shareData = {
+                    title: `[지쿱 AI] ${prompt.title}`,
+                    text: `${prompt.content}\n\n- 지쿱 AI 대학교`,
+                    url: window.location.href
+                };
+                if (navigator.share) {
+                    try { await navigator.share(shareData); } catch (err) {}
+                } else {
+                    handleCopy(prompt.content, prompt.id);
+                    setShowToast("프롬프트가 클립보드에 복사되었습니다.");
+                    setTimeout(() => setShowToast(null), 3000);
+                }
+            };
+
+            const handleVisitLink = (content) => {
+                const urlMatch = content.match(/(https?:\/\/[^\s]+)/g);
+                if (urlMatch) window.open(urlMatch[0], '_blank');
+            };
+
+            return (
+                <div className="min-h-screen pb-24">
+                    <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b px-4 py-4 shadow-sm">
+                        <div className="flex items-center justify-between mb-4">
+                            <h1 className="text-2xl font-black text-indigo-700 flex items-center gap-2">
+                                <Icon name="book-open" className="text-indigo-600" /> 지쿱 AI 대학교 1학년 프롬프트북
+                            </h1>
+                            <span className="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1 rounded-full border border-indigo-100 uppercase tracking-tighter">G-Coop AI Univ</span>
+                        </div>
+                        <div className="relative">
+                            <Icon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input type="text" placeholder="프롬프트 제목이나 내용 검색..." className="w-full pl-10 pr-4 py-3 bg-slate-100 border-none rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                        </div>
+                    </header>
+
+                    <nav className="bg-white border-b sticky top-[125px] z-20 py-4 px-4 flex flex-wrap gap-2 justify-center shadow-sm">
+                        {CATEGORIES.map(cat => (
+                            <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-4 py-2.5 rounded-2xl text-[12px] font-bold border transition-all ${selectedCategory === cat ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg scale-105' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>{cat.includes('.') ? cat.split('.')[1].trim() : cat}</button>
+                        ))}
+                    </nav>
+
+                    <main className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-4xl mx-auto">
+                        {filteredPrompts.map(prompt => {
+                            const isSpecial = prompt.category.includes("일일과제") || prompt.category.includes("GEMS");
+                            const hasLink = prompt.content.includes("http");
+                            
+                            return (
+                                <div key={prompt.id} onClick={() => setSelectedPrompt(prompt)} className={`group bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-200 flex flex-col transition-all active:scale-95 cursor-pointer hover:shadow-xl relative ${isSpecial ? 'border-l-8 border-l-indigo-600 min-h-[160px]' : ''}`}>
+                                    {!isSpecial && prompt.imageUrl && (
+                                        <div className="relative aspect-[9/16] bg-slate-100 overflow-hidden">
+                                            <img src={prompt.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" onError={(e)=>{e.target.src='https://via.placeholder.com/720x1280?text=Image+Needed'}} />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+                                            <div className="absolute bottom-4 left-4 right-4 text-white">
+                                                <p className="text-[10px] font-bold text-indigo-300 uppercase mb-1">{prompt.category.split('.')[0] || 'G-COOP'}</p>
+                                                <h3 className="font-bold text-lg leading-tight line-clamp-1">{prompt.title}</h3>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {isSpecial && (
+                                        <div className="p-6 flex-1 flex flex-col gap-3 bg-indigo-50/40">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2 text-indigo-700">
+                                                    <Icon name={hasLink ? "globe" : "clipboard-list"} size={22} />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">{prompt.category.includes("GEMS") ? "GEMS Setting" : "Daily Task"}</span>
+                                                </div>
+                                                {prompt.imageUrl && (
+                                                    <div className="bg-indigo-600 text-white p-1 rounded-md">
+                                                        <Icon name="image" size={12} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <h3 className="font-bold text-lg text-slate-900 leading-snug">{prompt.title}</h3>
+                                            <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed italic bg-white/60 p-3 rounded-xl border border-indigo-100">{prompt.content}</p>
+                                        </div>
+                                    )}
+
+                                    <div className="p-4 bg-white flex gap-2 border-t border-slate-100 mt-auto">
+                                        <button onClick={(e) => { e.stopPropagation(); handleCopy(prompt.content, prompt.id); }} className={`flex-1 py-3 rounded-xl text-[12px] font-black transition-all ${copiedId === prompt.id ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white'}`}>{copiedId === prompt.id ? '복사성공!' : '복사'}</button>
+                                        
+                                        {prompt.imageUrl && (
+                                            <button onClick={(e) => handleDownload(e, prompt.imageUrl, prompt.title)} className="p-3 bg-slate-100 text-slate-500 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200" title="이미지 저장">
+                                                <Icon name="download" size={18} />
+                                            </button>
+                                        )}
+
+                                        <button onClick={(e) => handleShare(e, prompt)} className="p-3 bg-slate-100 text-slate-500 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200" title="공유하기">
+                                            <Icon name="share-2" size={18} />
+                                        </button>
+                                        
+                                        {hasLink && <button onClick={(e) => { e.stopPropagation(); handleVisitLink(prompt.content); }} className="p-3 bg-indigo-600 text-white rounded-xl shadow-lg active:scale-90"><Icon name="external-link" size={18} /></button>}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </main>
+
+                    {selectedPrompt && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-md" onClick={() => setSelectedPrompt(null)} />
+                            <div className="relative bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden flex flex-col max-h-[90vh] shadow-2xl animate-in zoom-in-95 duration-300">
+                                <button onClick={() => setSelectedPrompt(null)} className="absolute top-5 right-5 z-10 bg-black/40 text-white p-2 rounded-full hover:bg-black/60 transition-colors"><Icon name="x" size={20} /></button>
+                                
+                                <div className="overflow-y-auto custom-scrollbar">
+                                    {selectedPrompt.imageUrl && (
+                                        <div className="w-full aspect-[9/16] bg-slate-100 relative">
+                                            <img src={selectedPrompt.imageUrl} alt={selectedPrompt.title} className="w-full h-full object-cover" />
+                                            <button 
+                                                onClick={(e) => handleDownload(e, selectedPrompt.imageUrl, selectedPrompt.title)}
+                                                className="absolute bottom-4 right-4 bg-white/20 backdrop-blur-xl text-white p-3 rounded-2xl transition-all shadow-lg flex items-center gap-2 border border-white/20"
+                                            >
+                                                <Icon name="download" size={20} />
+                                                <span className="text-xs font-bold">이미지 저장</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                    <div className="p-8">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100 uppercase">{selectedPrompt.category}</span>
+                                            <button onClick={(e) => handleShare(e, selectedPrompt)} className="flex items-center gap-1.5 text-slate-500 hover:text-indigo-600 transition-colors text-xs font-bold">
+                                                <Icon name="share-2" size={16} /> 공유하기
+                                            </button>
+                                        </div>
+                                        <h2 className="text-2xl font-black mb-6 text-slate-900 leading-tight">{selectedPrompt.title}</h2>
+                                        <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 mb-8 shadow-inner">
+                                            <p className="text-slate-800 text-base leading-relaxed whitespace-pre-wrap font-medium">{selectedPrompt.content}</p>
+                                        </div>
+                                        <div className="flex flex-col gap-3">
+                                            <button onClick={() => handleCopy(selectedPrompt.content, selectedPrompt.id)} className={`w-full py-5 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl ${copiedId === selectedPrompt.id ? 'bg-green-500 text-white' : 'bg-indigo-600 text-white shadow-indigo-200'}`}>{copiedId === selectedPrompt.id ? '복사 완료!' : '전체 내용 복사하기'}</button>
+                                            {selectedPrompt.content.includes("http") && <button onClick={() => handleVisitLink(selectedPrompt.content)} className="w-full py-4 rounded-2xl bg-white text-indigo-600 border-2 border-indigo-600 font-bold flex items-center justify-center gap-2">사이트 바로가기 <Icon name="external-link" size={18} /></button>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {showToast && <div className="fixed bottom-24 left-4 right-4 z-[110] animate-in slide-in-from-bottom duration-300"><div className="bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-2xl text-sm font-bold text-center">{showToast}</div></div>}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
